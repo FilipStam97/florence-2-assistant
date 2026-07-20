@@ -2,22 +2,29 @@
 import {Label, ListBox, Select} from "@heroui/react";
 
 type PromptDropdownProps = {
-    prompts: Array<{prompt: string, promptName: string, promptType: string}>
+    prompts: Array<{prompt: string, promptName: string, promptType: string}>,
+    prompt: string,
+    setPrompt: any,
+    resetMessage: Function
 }
 
-export default function PromptDropdown({prompts}: PromptDropdownProps) {
+export default function PromptDropdown({prompts,prompt,setPrompt, resetMessage}: PromptDropdownProps) {
 
 
-    const items = prompts.map(prompt => (
-          <ListBox.Item className="text-black" id={prompt.prompt} key={prompt.prompt} textValue={prompt.promptName}>
-            {prompt.promptName}
+    const items = prompts.map(promptItem => (
+          <ListBox.Item className="text-black" value={promptItem.prompt} id={promptItem.prompt} key={promptItem.prompt} textValue={promptItem.promptName}>
+            {promptItem.promptName}
             <ListBox.ItemIndicator />
           </ListBox.Item>
     ))
 
    return (
-    <Select className="w-[256px]" placeholder="Select one">
-      <Label>State</Label>
+    <Select className="w-[256px] py-4" placeholder="Select one" onChange={(value) => {
+      console.log(value)
+      resetMessage()
+      setPrompt(value)
+      }}  value={prompt}>
+      <Label>Propmt</Label>
       <Select.Trigger>
         <Select.Value />
         <Select.Indicator />

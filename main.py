@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from predictor  import Florence2Model   
+from typing import Optional
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 UPLOADS_DIR = os.path.join(PROJECT_ROOT, "uploads")
@@ -34,17 +35,17 @@ def health():
     return {"status": "ok"}
 
 
-url = "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/transformers/tasks/car.jpg?download=true"
-image = Image.open(requests.get(url, stream=True).raw)
-#prompt = "<MORE_DETAILED_CAPTION>"
-@app.post("/test")
-async def test_endpoint(
-    file: UploadFile = File(...),
+
+@app.post("/predict")
+async def predict(
+    image: UploadFile = File(...),
     prompt: str = Form(...),
-    text_input: str = Form(...)
+    text_input: Optional[str] = Form(None)
 ):
     model = Florence2Model()
+    pil_image = Image.open(image.file).convert("RGB")
 
 
-    res = model.run(image=image, task_prompt=prompt)
+    res = model.run(image=pil_image, task_prompt=prompt, text_input=text_input)
+    print(res)
     return res

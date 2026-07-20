@@ -1,4 +1,4 @@
-export const FLORENCE_2_PROMPTS =   [
+export const FLORENCE_2_PROMPTS: Array<{prompt: string, promptName: string, promptType: PromptType}> =   [
   {
     prompt: "<CAPTION>",
     promptName: "Caption",
@@ -75,3 +75,13 @@ export const FLORENCE_2_PROMPTS =   [
     promptType: "ocr",
   }
 ];
+
+
+export const PROMPTS_REQUIRING_TEXT_INPUT = [
+  "<CAPTION_TO_PHRASE_GROUNDING>", "<REFERRING_EXPRESSION_SEGMENTATION>", "<OPEN_VOCABULARY_DETECTION>", "<REGION_TO_SEGMENTATION>"
+]
+
+export type PromptType =   "ocr" | "caption" |  "classification" |  "segmentation" |   "detection" |   "grounding" |   "proposal" |  "region-caption"
+
+
+//4 caption, 3 ocr, 2 detection, 1 region-caption, 1 proposal, 1 grounding, 2 segmentation, 1 classification
