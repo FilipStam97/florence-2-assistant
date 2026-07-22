@@ -5,6 +5,7 @@ from transformers import AutoProcessor, AutoModelForCausalLM
 
 
 
+
 class Florence2Model:
     def __init__(self) -> None:
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -32,3 +33,8 @@ class Florence2Model:
 
         print(parsed_answer)
         return parsed_answer
+    
+
+
+    
+

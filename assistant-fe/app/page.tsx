@@ -11,7 +11,7 @@ import { CaptionDisplay } from "./common/CaptionDisplay";
 
 export default function Home() {
  const [image, setImage] = useState<File | null>(null);
-   const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState('');
   const [textInput, setTextInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<any | undefined>(undefined);
@@ -48,7 +48,7 @@ export default function Home() {
       });
 
       const data = await response.json();
-
+    
       if (response.ok) {
         setMessage(data);
       } else {
@@ -92,6 +92,9 @@ export default function Home() {
             {!loading && currentPrompt && message && currentPrompt.promptType !== "caption" &&
               <p>{JSON.stringify(message)}</p>
             }
+            {/* {!loading && currentPrompt && message && currentPrompt.promptType !== "caption" &&
+              <img src={`http://127.0.0.1:8000${message["imgSrc"]}`}/>
+            } */}
           </div>
         </div>
       </main>
