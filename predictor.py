@@ -31,7 +31,6 @@ class Florence2Model:
 
         parsed_answer = self.processor.post_process_generation(generated_text, task=task_prompt, image_size=(image.width, image.height))
 
-        print(parsed_answer)
         return parsed_answer
     
 

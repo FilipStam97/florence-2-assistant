@@ -1,13 +1,14 @@
 'use client'
 
-import { Button } from "@heroui/react";
+import { Button, Card } from "@heroui/react";
 import Image from "next/image";
 import PromptDropdown from "./common/PromptDropdown";
-import { FLORENCE_2_PROMPTS, PROMPTS_REQUIRING_TEXT_INPUT } from "./constants";
+import { FLORENCE_2_PROMPTS, Prompt, PROMPTS_REQUIRING_TEXT_INPUT } from "./constants";
 import ImageDropZone from "./common/ImageDropZone";
 import { BasicTextInput } from "./common/BasicTextInput";
 import { useState } from "react";
 import { CaptionDisplay } from "./common/CaptionDisplay";
+import { ResponseComponent } from "./common/ResponseComponent";
 
 export default function Home() {
  const [image, setImage] = useState<File | null>(null);
@@ -66,9 +67,7 @@ export default function Home() {
       setMessage(undefined);
     }
 
-    function parseCaptionMessage(prompt: string, message: any) {
-      return message[prompt];
-    }
+
 
   return (
     <div className="flex flex-col flex-1 items-center bg-black justify-center font-sans dark:bg-black">
@@ -86,15 +85,10 @@ export default function Home() {
             </Button>
           </div>
           <div>
-            {!loading && currentPrompt && message && currentPrompt.promptType === "caption" &&
-              <CaptionDisplay title={currentPrompt.promptName} text={parseCaptionMessage(prompt, message)}/>
+            {!loading && currentPrompt && message &&
+              <ResponseComponent prompt={currentPrompt as any} data={message}/>
             }
-            {!loading && currentPrompt && message && currentPrompt.promptType !== "caption" &&
-              <p>{JSON.stringify(message)}</p>
-            }
-            {/* {!loading && currentPrompt && message && currentPrompt.promptType !== "caption" &&
-              <img src={`http://127.0.0.1:8000${message["imgSrc"]}`}/>
-            } */}
+      
           </div>
         </div>
       </main>

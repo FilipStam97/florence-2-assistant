@@ -1,7 +1,8 @@
-import os
 import cv2
 import numpy as np
 from pathlib import Path
+from enum import Enum
+
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -28,19 +29,43 @@ def annotate_ocr(data: dict, image_path: Path) -> str:
         for label in data["labels"]
     ]
 
+    coords = data.get("quad_boxes") or data.get("bboxes")
+
+    if coords is None:
+        raise ValueError(f"No coordinates found. Keys: {list(data.keys())}")
+
     # Iterate through every detected OCR region and its corresponding text
-    for box, label in zip(data["quad_boxes"], labels):
+    for box, label in zip(coords, labels):
+        box_array = np.array(box, dtype=np.float32)
 
-        # Florence returns each quadrilateral as:
+        # OCR_WITH_REGION returns 8 values:
         # [x1, y1, x2, y2, x3, y3, x4, y4]
-        # Reshape it into four (x, y) coordinate pairs.
-        pts = np.array(box, dtype=np.float32).reshape(4, 2)
+        if box_array.size == 8:
+            pts = box_array.reshape(4, 2)
 
-        # Convert floating-point coordinates into integer pixel coordinates
-        # required by OpenCV drawing functions.
+        # Object detection and similar tasks return 4 values:
+        # [x1, y1, x2, y2]
+        elif box_array.size == 4:
+            x1, y1, x2, y2 = box_array
+
+            # Convert the rectangle into four corner points
+            pts = np.array(
+                [
+                    [x1, y1],
+                    [x2, y1],
+                    [x2, y2],
+                    [x1, y2],
+                ],
+                dtype=np.float32,
+            )
+
+        else:
+            raise ValueError(
+                f"Unsupported box format with {box_array.size} values: {box}"
+            )
+
         pts = np.round(pts).astype(np.int32)
 
-        # Draw the OCR quadrilateral using a green outline
         cv2.polylines(
             image,
             [pts],
@@ -49,12 +74,9 @@ def annotate_ocr(data: dict, image_path: Path) -> str:
             thickness=2,
         )
 
-        # Position the label above the bounding box.
-        # Using the minimum x/y values places it near the top-left corner.
         text_x = int(pts[:, 0].min())
         text_y = max(int(pts[:, 1].min()) - 5, 20)
 
-        # Draw the recognized text in red
         cv2.putText(
             image,
             label,
@@ -79,3 +101,22 @@ def annotate_ocr(data: dict, image_path: Path) -> str:
 
     # Return the output filename so it can be sent back to the client
     return output_filename
+
+
+
+class Prompt(Enum):
+    CAPTION = "<CAPTION>"
+    DETAILED_CAPTION = "<DETAILED_CAPTION>"
+    MORE_DETAILED_CAPTION = "<MORE_DETAILED_CAPTION>"
+    OCR = "<OCR>"
+    OCR_WITH_REGION = "<OCR_WITH_REGION>"
+    OD = "<OD>"
+    DENSE_REGION_CAPTION = "<DENSE_REGION_CAPTION>"
+    REGION_PROPOSAL = "<REGION_PROPOSAL>"
+    CAPTION_TO_PHRASE_GROUNDING = "<CAPTION_TO_PHRASE_GROUNDING>"
+    REFERRING_EXPRESSION_SEGMENTATION = "<REFERRING_EXPRESSION_SEGMENTATION>"
+    OPEN_VOCABULARY_DETECTION = "<OPEN_VOCABULARY_DETECTION>"
+    REGION_TO_SEGMENTATION = "<REGION_TO_SEGMENTATION>"
+    REGION_TO_CATEGORY = "<REGION_TO_CATEGORY>"
+    REGION_TO_DESCRIPTION = "<REGION_TO_DESCRIPTION>"
+    REGION_TO_OCR = "<REGION_TO_OCR>"
