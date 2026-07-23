@@ -14,7 +14,7 @@ from pathlib import Path
 import uuid
 import json
 
-from util import Prompt, annotate_ocr
+from util import Prompt, annotate_ocr, draw_polygons
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOADS_DIR = BASE_DIR / "uploads"
@@ -88,17 +88,33 @@ def  get_res_by_prompt(prompt: str, image: UploadFile, text_input = None):
             Prompt.CAPTION_TO_PHRASE_GROUNDING.value
         }
 
+      segmentation_prompts = {
+            Prompt.REGION_TO_SEGMENTATION.value,
+            Prompt.REFERRING_EXPRESSION_SEGMENTATION.value,
+        }
+
       parsedRes = parse_florence_res(res)
       
       match prompt:
            case p if p in caption_prompts:
                 return {"caption": parsedRes}
            case p if p in annotation_prompts:
-                upload_path = UPLOADS_DIR / f"{uuid.uuid4().hex}{extension}"
-                pil_image.save(upload_path)
+                upload_path = save_uploaded_image(pil_image, extension)
                 out_filename = annotate_ocr(parsedRes, upload_path)
+                if out_filename is None:
+                        raise ValueError("Image has no filename")
+                return {"imgSrc": f"/outputs/{out_filename}"}
+           case p if p in segmentation_prompts:
+                upload_path = save_uploaded_image(pil_image, extension)
+                out_filename = draw_polygons(parsedRes, upload_path)
                 if out_filename is None:
                         raise ValueError("Image has no filename")
                 return {"imgSrc": f"/outputs/{out_filename}"}
            case _:
                 return res
+
+
+def save_uploaded_image(pil_image, extension: str):
+    upload_path = UPLOADS_DIR / f"{uuid.uuid4().hex}{extension}"
+    pil_image.save(upload_path)
+    return upload_path

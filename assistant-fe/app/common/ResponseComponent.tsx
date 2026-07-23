@@ -18,6 +18,9 @@ const imagePrompts = new Set<Prompt>([
   Prompt.DENSE_REGION_CAPTION,
   Prompt.REGION_PROPOSAL,
   Prompt.CAPTION_TO_PHRASE_GROUNDING,
+  Prompt.REFERRING_EXPRESSION_SEGMENTATION,
+  Prompt.REGION_TO_SEGMENTATION,
+  Prompt.OPEN_VOCABULARY_DETECTION,
 ]);
 
 
@@ -30,8 +33,7 @@ interface ResponseProps {
   data: any;
 }
 
-//I have to cover these 3 and then i am done:
-//  "<REFERRING_EXPRESSION_SEGMENTATION>", "<OPEN_VOCABULARY_DETECTION>", "<REGION_TO_SEGMENTATION>"
+//I have to cover "<OPEN_VOCABULARY_DETECTION>" and then i am done:
 
 
 export const ResponseComponent: React.FC<ResponseProps> = ({ prompt, data }) => {

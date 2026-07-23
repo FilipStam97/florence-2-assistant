@@ -3,8 +3,6 @@ import numpy as np
 from pathlib import Path
 from enum import Enum
 
-
-
 BASE_DIR = Path(__file__).resolve().parent
 UPLOADS_DIR = BASE_DIR / "uploads"
 OUTPUTS_DIR = BASE_DIR / "outputs"
@@ -87,6 +85,76 @@ def annotate_ocr(data: dict, image_path: Path) -> str:
             2,
         )
 
+    output_filename = save_image_return_filename(image, image_path)
+    return output_filename
+
+
+
+def draw_polygons(data: dict, image_path: Path) -> str:
+    """
+    Draw segmentation polygons and their labels on an image.
+
+    Args:
+        image: OpenCV image.
+        polygons: List of polygons returned by Florence-2.
+        labels: Corresponding labels.
+    """
+
+        # Load the image from disk using OpenCV
+    image = cv2.imread(str(image_path))
+
+    # Ensure the image was loaded successfully
+    if image is None:
+        raise ValueError(f"Could not read image: {image_path}")
+
+    # Remove Florence-2 special tokens (e.g. "</s>") from the OCR labels
+    labels = [
+        label.replace("</s>", "").strip()
+        for label in data["labels"]
+    ]
+
+    polygons = data.get("polygons")
+
+    if polygons is None:
+        raise ValueError(f"No coordinates found. Keys: {list(data.keys())}")
+    
+    for polygon_group, label in zip(polygons, labels):
+        # A single object may consist of multiple polygons
+        for polygon in polygon_group:
+            pts = np.array(polygon, dtype=np.float32).reshape(-1, 2)
+            pts = np.round(pts).astype(np.int32)
+
+            # Draw polygon outline
+            cv2.polylines(
+                image,
+                [pts],
+                isClosed=True,
+                color=(0, 255, 0),
+                thickness=2,
+            )
+
+            # Uncomment to fill the polygon instead
+            # cv2.fillPoly(image, [pts], (0, 255, 0))
+
+            # Draw the label near the top-left corner
+            if label:
+                text_x = int(pts[:, 0].min())
+                text_y = max(int(pts[:, 1].min()) - 5, 20)
+
+                cv2.putText(
+                    image,
+                    label,
+                    (text_x, text_y),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    (0, 0, 255),
+                    2,
+                )
+
+    output_filename = save_image_return_filename(image, image_path)
+    return output_filename
+
+def save_image_return_filename(image, image_path: Path):
     # Create the output directory if it doesn't already exist
     outputs_dir = Path(BASE_DIR) / "outputs"
     outputs_dir.mkdir(parents=True, exist_ok=True)
@@ -101,7 +169,6 @@ def annotate_ocr(data: dict, image_path: Path) -> str:
 
     # Return the output filename so it can be sent back to the client
     return output_filename
-
 
 
 class Prompt(Enum):

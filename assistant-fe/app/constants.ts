@@ -84,8 +84,6 @@ export const PROMPTS_REQUIRING_TEXT_INPUT = [
 export type PromptType =   "ocr" | "caption" |  "classification" |  "segmentation" |   "detection" |   "grounding" |   "proposal" |  "region-caption"
 
 
-//4 caption, 3 ocr, 2 detection, 1 region-caption, 1 proposal, 1 grounding, 2 segmentation, 1 classification
-
 export enum Prompt {
   CAPTION = "<CAPTION>",
   DETAILED_CAPTION = "<DETAILED_CAPTION>",
