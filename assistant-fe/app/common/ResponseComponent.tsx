@@ -33,8 +33,6 @@ interface ResponseProps {
   data: any;
 }
 
-//I have to cover "<OPEN_VOCABULARY_DETECTION>" and then i am done:
-
 
 export const ResponseComponent: React.FC<ResponseProps> = ({ prompt, data }) => {
 
